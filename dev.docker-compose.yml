@@ -1,0 +1,55 @@
+version: '3'
+
+services:
+  postgres:
+    container_name: 'postgres-container'
+    image: postgres
+    restart: always
+    volumes:
+      - pg_data:/var/lib/postgresql/data/
+    env_file:
+      - .env
+    networks:
+      - custom
+    ports:
+      - '${POSTGRES_PORT}:${POSTGRES_PORT}'
+
+  redis:
+    container_name: 'redis-container'
+    image: redis:alpine
+    volumes:
+      - ./docker/redis/data:/data
+    env_file:
+      - .env
+    restart: always
+    ports:
+      - "${REDIS_PORT}:6379"
+
+  elasticsearch:
+    container_name: es-container
+    image: elasticsearch:8.2.3
+    environment:
+      - xpack.security.enabled=false
+      - "discovery.type=single-node"
+    networks:
+      - custom
+    ports:
+      - "9200:9200"
+  kibana:
+    container_name: kb-container
+    image: kibana:8.2.3
+    environment:
+      - ELASTICSEARCH_HOSTS=http://es-container:9200
+    networks:
+      - custom
+    depends_on:
+      - elasticsearch
+    ports:
+      - "5601:5601"
+
+networks:
+  custom:
+    driver: bridge
+
+volumes:
+  pg_data:
