@@ -43,6 +43,12 @@ run-prod:
 	make migrate
 	make run
 
+up-redis:
+	docker run -d --name redis -p 6379:6379 redis:alpine
+
+down-redis:
+	docker stop redis
+
 up-elasticsearch:
 	docker run -d --name elastic -p 9200:9200 elasticsearch:8.2.3
 
